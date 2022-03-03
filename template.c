@@ -10,17 +10,19 @@ int main(int argc, char **argv){
 	int id = 0;
 	int templateDescriptor;
 	DIR *folder;
+
 	char *homeFolder = getenv("HOME");
-	char *Templates = "/Templates";
+	char *Templates = "/Templates/";
+
 	char *path = malloc(strlen(homeFolder) + strlen(Templates));
-		
 	strcat(path,homeFolder);
 	strcat(path,Templates);
+
 	char *pathPlusName = { 0 };
 	struct dirent *dirent;
 	folder = opendir(path);
 	int destinationDescriptor;
-	char *destinationPathPlusName= { 0 };
+	char *destinationPathPlusName = { 0 };
 	char ch;
 	int bytes;
 	while((dirent = readdir(folder))){
@@ -49,7 +51,7 @@ int main(int argc, char **argv){
 					strcat(destinationPathPlusName,dirent->d_name);
 
 					//create new file if it dosent exist and write the template data
-					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT | O_EXCL);
+					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
 
 					while((bytes = read(templateDescriptor,&ch,sizeof(ch))) > 0){
 						write(destinationDescriptor,&ch,sizeof(ch));
