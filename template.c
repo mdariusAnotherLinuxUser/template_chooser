@@ -43,7 +43,7 @@ int main(int argc, char **argv){
 					strcat(destinationPathPlusName,"./");
 					strcat(destinationPathPlusName,dirent->d_name);
 
-					//create new file and write(or even overwrite) the data
+					//create new file and write(and not overwrite) the data
 					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT | O_EXCL);
 
 					while((bytes = read(templateDescriptor,&ch,sizeof(ch))) > 0){
