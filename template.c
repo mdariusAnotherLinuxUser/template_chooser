@@ -10,7 +10,12 @@ int main(int argc, char **argv){
 	int id = 0;
 	int templateDescriptor;
 	DIR *folder;
-	char *path = "/home/d/Templates/";
+	char *homeFolder = getenv("HOME");
+	char *Templates = "/Templates";
+	char *path = malloc(strlen(homeFolder) + strlen(Templates));
+		
+	strcat(path,homeFolder);
+	strcat(path,Templates);
 	char *pathPlusName = { 0 };
 	struct dirent *dirent;
 	folder = opendir(path);
