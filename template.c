@@ -10,13 +10,14 @@ int main(int argc, char **argv){
 	int id = 0;
 	int templateDescriptor;
 	DIR *folder;
+	//getting the home folder path
+	char *homeFolderName = getenv("HOME");
+	
+	char *TemplatesFolderName = "/Templates/";
 
-	char *homeFolder = getenv("HOME");
-	char *Templates = "/Templates/";
-
-	char *path = malloc(strlen(homeFolder) + strlen(Templates));
-	strcat(path,homeFolder);
-	strcat(path,Templates);
+	char *path = malloc(strlen(homeFolderName) + strlen(TemplatesFolderName));
+	strcat(path,homeFolderName);
+	strcat(path,TemplatesFolderName);
 
 	char *pathPlusName = { 0 };
 	struct dirent *dirent;
@@ -52,7 +53,7 @@ int main(int argc, char **argv){
 
 					//create new file if it dosent exist and write the template data
 					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
-
+					//I dont mind making  system calls for every character, the speed of execution is practically instant anyway
 					while((bytes = read(templateDescriptor,&ch,sizeof(ch))) > 0){
 						write(destinationDescriptor,&ch,sizeof(ch));
 					}
