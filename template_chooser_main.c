@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
 int main(int argc, char **argv){
 
 	int chosenId;
@@ -24,8 +25,9 @@ int main(int argc, char **argv){
 	folder = opendir(path);
 	int destinationDescriptor;
 	char *destinationPathPlusName = { 0 };
-	char ch;
+	char *templateData = { 0 };
 	int bytes;
+	struct stat *templateStats = { 0 };
 	while((dirent = readdir(folder))){
 		
 		if(strcmp(dirent->d_name,".") && strcmp(dirent->d_name,"..") ){
@@ -46,6 +48,9 @@ int main(int argc, char **argv){
 				
 					
 					templateDescriptor = open(pathPlusName,O_RDONLY);
+					templateStats = malloc(sizeof(struct stat));
+					fstat(templateDescriptor,templateStats);
+					templateData = malloc(templateStats->st_size);
 
 					destinationPathPlusName = malloc(strlen("./") + strlen(dirent->d_name));
 					strcat(destinationPathPlusName,"./");
@@ -53,9 +58,10 @@ int main(int argc, char **argv){
 
 					//create new file if it dosent exist and write the template data
 					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
-					//I dont mind making  system calls for every character, the speed of execution is practically instant anyway
-					while((bytes = read(templateDescriptor,&ch,sizeof(ch))) > 0){
-						write(destinationDescriptor,&ch,sizeof(ch));
+					//previsouly i didnt minded making  system calls for every character, the speed of execution was practically instant anyway but my programmer brain did something better anyway
+					
+					while((bytes = read(templateDescriptor,templateData,templateStats->st_size)) > 0){
+						write(destinationDescriptor,templateData,templateStats->st_size);
 					}
 					
 				}
@@ -66,6 +72,8 @@ int main(int argc, char **argv){
 	
 	if(pathPlusName != NULL) free(pathPlusName);
 	if(destinationPathPlusName != NULL) free(destinationPathPlusName);
+	if(templateData != NULL) free(templateData);
+	if(templateStats != NULL) free(templateStats);
 	close(templateDescriptor);
 	close(destinationDescriptor);
 	closedir(folder);
