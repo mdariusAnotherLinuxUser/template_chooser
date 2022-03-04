@@ -16,6 +16,7 @@ int main(int argc, char **argv){
 	
 	char *TemplatesFolderName = "/Templates/";
 
+	//allocating memory and appending the homeFolderName and TemplatesFolderName to the path
 	char *path = malloc(strlen(homeFolderName) + strlen(TemplatesFolderName));
 	strcat(path,homeFolderName);
 	strcat(path,TemplatesFolderName);
@@ -26,8 +27,8 @@ int main(int argc, char **argv){
 	int destinationDescriptor;
 	char *destinationPathPlusName = { 0 };
 	char *templateData = { 0 };
-	int bytes;
 	struct stat *templateStats = { 0 };
+	
 	while((dirent = readdir(folder))){
 		
 		if(strcmp(dirent->d_name,".") && strcmp(dirent->d_name,"..") ){
@@ -46,23 +47,30 @@ int main(int argc, char **argv){
 					strcat(pathPlusName,path);
 					strcat(pathPlusName,dirent->d_name);
 				
-					
+					//opening the template file fo reading
 					templateDescriptor = open(pathPlusName,O_RDONLY);
+					
+					//allocating size for the file stats and reading the stats
 					templateStats = malloc(sizeof(struct stat));
 					fstat(templateDescriptor,templateStats);
-					templateData = malloc(templateStats->st_size);
-
+					
+					
 					destinationPathPlusName = malloc(strlen("./") + strlen(dirent->d_name));
 					strcat(destinationPathPlusName,"./");
 					strcat(destinationPathPlusName,dirent->d_name);
 
 					//create new file if it dosent exist and write the template data
 					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
-					//previsouly i didnt minded making  system calls for every character, the speed of execution was practically instant anyway but my programmer brain did something better anyway
+
 					
-					while((bytes = read(templateDescriptor,templateData,templateStats->st_size)) > 0){
-						write(destinationDescriptor,templateData,templateStats->st_size);
-					}
+					//previsouly i didnt minded making  system calls for every character, the speed of execution was practically instant anyway but my programmer brain did something better anyway
+					//allocating size for the data
+					templateData = malloc(templateStats->st_size);
+
+					//reading and writing the data
+					read(templateDescriptor,templateData,templateStats->st_size);
+					write(destinationDescriptor,templateData,templateStats->st_size);
+					
 					
 				}
 			}
