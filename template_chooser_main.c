@@ -9,8 +9,6 @@ int main(int argc, char **argv){
 
 	int chosenId;
 	int id = 0;
-
-	int templateDescriptor;
 	//getting the home folder path
 	char *homeFolderName = getenv("HOME");
 	
@@ -25,14 +23,10 @@ int main(int argc, char **argv){
 	//folder and folder contents
 	DIR *templateFolder = opendir(path);
 	struct dirent *currentFile;
-	
-
-	int destinationDescriptor;
-	char *destinationPathPlusName = { 0 };
 
 	char *templateData = { 0 };
 	struct stat *templateStats = { 0 };
-	char *ptrToName;
+	char *ptrToName = { 0 };
 	while((currentFile = readdir(templateFolder))){
 		
 		if(strcmp(currentFile->d_name,".") && strcmp(currentFile->d_name,"..") ){
@@ -52,7 +46,7 @@ int main(int argc, char **argv){
 					strcat(pathPlusName,currentFile->d_name);
 				
 					//opening the template file fo reading
-					templateDescriptor = open(pathPlusName,O_RDONLY);
+					int templateDescriptor = open(pathPlusName,O_RDONLY);
 					
 					//allocating size for the file stats and reading the stats
 					templateStats = malloc(sizeof(struct stat));
@@ -69,7 +63,7 @@ int main(int argc, char **argv){
 						
 
 					//create new file if it dosent exist and write the template data
-					destinationDescriptor = open(ptrToName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
+					int destinationDescriptor = open(ptrToName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
 
 					
 					//allocating size for the data
@@ -78,20 +72,21 @@ int main(int argc, char **argv){
 					//reading and writing the data
 					read(templateDescriptor,templateData,templateStats->st_size);
 					write(destinationDescriptor,templateData,templateStats->st_size);
+					//freeing the allocated memory and closing the file descriptors 
 					
+					free(pathPlusName);
+					free(templateData);
+					free(templateStats);
+
+					close(templateDescriptor);
+					close(destinationDescriptor);
 					
 				}
 			}
 			id++;
 		}
 	}
-	
-	if(pathPlusName != NULL) free(pathPlusName);
-	if(destinationPathPlusName != NULL) free(destinationPathPlusName);
-	if(templateData != NULL) free(templateData);
-	if(templateStats != NULL) free(templateStats);
-	close(templateDescriptor);
-	close(destinationDescriptor);
+	free(path);
 	closedir(templateFolder);
 	return 0;
 }
