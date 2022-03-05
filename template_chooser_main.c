@@ -9,8 +9,8 @@ int main(int argc, char **argv){
 
 	int chosenId;
 	int id = 0;
+
 	int templateDescriptor;
-	DIR *folder;
 	//getting the home folder path
 	char *homeFolderName = getenv("HOME");
 	
@@ -22,30 +22,34 @@ int main(int argc, char **argv){
 	strcat(path,TemplatesFolderName);
 
 	char *pathPlusName = { 0 };
-	struct dirent *dirent;
-	folder = opendir(path);
+	//folder and folder contents
+	DIR *templateFolder = opendir(path);
+	struct dirent *currentFile;
+	
+
 	int destinationDescriptor;
 	char *destinationPathPlusName = { 0 };
+
 	char *templateData = { 0 };
 	struct stat *templateStats = { 0 };
-	
-	while((dirent = readdir(folder))){
+	char *ptrToName;
+	while((currentFile = readdir(templateFolder))){
 		
-		if(strcmp(dirent->d_name,".") && strcmp(dirent->d_name,"..") ){
+		if(strcmp(currentFile->d_name,".") && strcmp(currentFile->d_name,"..") ){
 			if(argc == 1){
 				
-				printf("%d --- %s\n",id,dirent->d_name);
+				printf("%d --- %s\n",id,currentFile->d_name);
 	
 			}else{
 				chosenId = atoi(argv[1]);
 				if(id == chosenId) {
-					printf("%s\n",dirent->d_name);
+					printf("%s\n",currentFile->d_name);
 
 					//get the size of the full file path and name
-					pathPlusName = malloc(strlen(path) + strlen(dirent->d_name));
+					pathPlusName = malloc(strlen(path) + strlen(currentFile->d_name));
 					
 					strcat(pathPlusName,path);
-					strcat(pathPlusName,dirent->d_name);
+					strcat(pathPlusName,currentFile->d_name);
 				
 					//opening the template file fo reading
 					templateDescriptor = open(pathPlusName,O_RDONLY);
@@ -53,11 +57,19 @@ int main(int argc, char **argv){
 					//allocating size for the file stats and reading the stats
 					templateStats = malloc(sizeof(struct stat));
 					fstat(templateDescriptor,templateStats);
-					
-					
-					destinationPathPlusName = malloc(strlen("./") + strlen(dirent->d_name));
+
+						switch(argc){
+							case 2:
+								ptrToName = currentFile->d_name;
+							break;
+							case 3:
+								ptrToName = argv[2];
+							break;
+						}
+						
+					destinationPathPlusName = malloc(strlen("./") + strlen(ptrToName));
 					strcat(destinationPathPlusName,"./");
-					strcat(destinationPathPlusName,dirent->d_name);
+					strcat(destinationPathPlusName,ptrToName);
 
 					//create new file if it dosent exist and write the template data
 					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
@@ -84,6 +96,6 @@ int main(int argc, char **argv){
 	if(templateStats != NULL) free(templateStats);
 	close(templateDescriptor);
 	close(destinationDescriptor);
-	closedir(folder);
+	closedir(templateFolder);
 	return 0;
 }
