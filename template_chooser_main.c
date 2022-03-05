@@ -67,15 +67,11 @@ int main(int argc, char **argv){
 							break;
 						}
 						
-					destinationPathPlusName = malloc(strlen("./") + strlen(ptrToName));
-					strcat(destinationPathPlusName,"./");
-					strcat(destinationPathPlusName,ptrToName);
 
 					//create new file if it dosent exist and write the template data
-					destinationDescriptor = open(destinationPathPlusName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
+					destinationDescriptor = open(ptrToName,O_WRONLY | O_CREAT , S_IRUSR | O_EXCL);
 
 					
-					//previsouly i didnt minded making  system calls for every character, the speed of execution was practically instant anyway but my programmer brain did something better anyway
 					//allocating size for the data
 					templateData = malloc(templateStats->st_size);
 
